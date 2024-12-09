@@ -4,7 +4,7 @@ log:
 
 serve:
   proxy:
-    port: ${PORT}
+    port: 4455
     cors:
       enabled: true
       allowed_origins:
