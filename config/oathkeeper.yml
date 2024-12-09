@@ -1,0 +1,95 @@
+log:
+  level: debug
+  format: json
+
+serve:
+  proxy:
+    port: ${PORT}
+    cors:
+      enabled: true
+      allowed_origins:
+        - "*"
+      allowed_methods:
+        - POST
+        - GET
+        - PUT
+        - PATCH
+        - DELETE
+      allowed_headers:
+        - Authorization
+        - Content-Type
+      exposed_headers:
+        - Content-Type
+      allow_credentials: true
+      debug: true
+
+errors:
+  fallback:
+    - json
+
+  handlers:
+    redirect:
+      enabled: true
+      config:
+        to: https://outhkeeper-example.onrender.com/login
+        when:
+          -
+            error:
+              - unauthorized
+              - forbidden
+            request:
+              header:
+                accept:
+                  - text/html
+    json:
+      enabled: true
+      config:
+        verbose: true
+
+access_rules:
+  matching_strategy: glob
+  repositories:
+    - file:///etc/config/oathkeeper/access-rules.json
+
+authenticators:
+  anonymous:
+    enabled: true
+    config:
+      subject: guest
+
+  cookie_session:
+    enabled: true
+    config:
+      check_session_url: https://kratos-example.onrender.com/sessions/whoami
+      preserve_path: true
+      extra_from: "@this"
+      subject_from: "identity.id"
+      only:
+        - ory_kratos_session
+
+  noop:
+    enabled: true
+
+authorizers:
+  allow:
+    enabled: true
+
+mutators:
+  noop:
+    enabled: true
+
+  header:
+    enabled: true
+    config:
+      headers:
+        X-User: "{{ print .Subject }}"
+
+  id_token:
+    enabled: true
+    config:
+      issuer_url: https://outhkeeper-example.onrender.com
+      jwks_url: file:///etc/config/oathkeeper/id_token.jwks.json
+      claims: |
+        {
+          "session": {{ .Extra | toJson }}
+        }
