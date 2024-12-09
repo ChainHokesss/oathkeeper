@@ -1,1 +1,1 @@
-web: go run main.go serve -c ./config/oathkeeper.yml
+web: ./main serve -c ./config/oathkeeper.yml
